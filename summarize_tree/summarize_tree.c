@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -16,6 +17,19 @@ bool is_dir(const char* path) {
    * return value from stat in case there is a problem, e.g., maybe the
    * the file doesn't actually exist.
    */
+
+	struct stat buf;
+	if (stat (path, &buf) == 1) {
+		return false; 
+	}
+			else { if (S_ISDIR(buf.st_mode)){
+				return true;
+		       	}
+			else {
+				return false;
+			}
+			}
+		
 }
 
 /* 
@@ -36,12 +50,38 @@ void process_directory(const char* path) {
    * with a matching call to chdir() to move back out of it when you're
    * done.
    */
+	DIR *Top_dir;
+	
+	struct dirent *dir;
+	
+	Top_dir=opendir(path);
+	
+	chdir(path);
+	
+	Top_dir = readdir(Top_dir);
+
+	num_dirs++;
+
+	while( Top_dir != NULL) {
+		if((strcmp(dir -> d_name, ".") ==0) || (strcmp(dir -> d_name, "..") == 0)){
+			continue; }
+		process_path(dir -> d_name); }
+
+	chdir("..");
+	closedir(Top_dir);
+
+
+
+
 }
 
 void process_file(const char* path) {
   /*
    * Update the number of regular files.
    */
+
+num_regular++;
+
 }
 
 void process_path(const char* path) {
