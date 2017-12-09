@@ -52,21 +52,24 @@ void process_directory(const char* path) {
    */
 	DIR *Top_dir;
 	
-	struct dirent *dir;
+	struct dirent *C_dir;
 	
-	Top_dir=opendir(path);
+	Top_dir = opendir(path);
 	
 	chdir(path);
 	
-	Top_dir = readdir(Top_dir);
+	C_dir = readdir(Top_dir);
 
-	num_dirs++;
+	
 
 	while( Top_dir != NULL) {
-		if((strcmp(dir -> d_name, ".") ==0) || (strcmp(dir -> d_name, "..") == 0)){
-			continue; }
-		process_path(dir -> d_name); }
+		if((strcmp(C_dir -> d_name, ".") !=0) && (strcmp(C_dir -> d_name, "..") != 0)){
+		process_path(C_dir -> d_name);
+       	}
+		C_dir = readdir(Top_dir);
+	}
 
+	num_dirs++;
 	chdir("..");
 	closedir(Top_dir);
 
