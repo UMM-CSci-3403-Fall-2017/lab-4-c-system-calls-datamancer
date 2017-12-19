@@ -7,109 +7,79 @@
 #include <unistd.h>
 #include <string.h>
 
-static int num_dirs, num_regular;
+//initialize variable for the number of idirectories and teh number of regular files
+static int num_dir;
+static int num_regular;
 
+//is_dir checks a directory of a file to determine if it is a directory or not. 
 bool is_dir(const char* path) {
-  /*
-   * Use the stat() function (try "man 2 stat") to determine if the file
-   * referenced by path is a directory or not.  Call stat, and then use
-   * S_ISDIR to see if the file is a directory. Make sure you check the
-   * return value from stat in case there is a problem, e.g., maybe the
-   * the file doesn't actually exist.
-   */
 
-	struct stat buf;
-	if (stat (path, &buf) == 1) {
-		return false; 
-	}
-			else { if (S_ISDIR(buf.st_mode)){
-				return true;
-		       	}
-			else {
+	struct stat dir;
+	if(stat(path, &dir) ==0) {
+			if(S_ISDIR(dir.st_mode)){
+			return true;	
+			} else { 
 				return false;
 			}
+			} else {
+			       	return false;
 			}
-		
-}
+		}
 
-/* 
- * I needed this because the multiple recursion means there's no way to
- * order them so that the definitions all precede the cause.
- */
 void process_path(const char*);
 
 void process_directory(const char* path) {
-  /*
-   * Update the number of directories seen, use opendir() to open the
-   * directory, and then use readdir() to loop through the entries
-   * and process them. You have to be careful not to process the
-   * "." and ".." directory entries, or you'll end up spinning in
-   * (infinite) loops. Also make sure you closedir() when you're done.
-   *
-   * You'll also want to use chdir() to move into this new directory,
-   * with a matching call to chdir() to move back out of it when you're
-   * done.
-   */
-	DIR *Top_dir;
-	
-	struct dirent *C_dir;
-	
+	//setting of dirrectory variables
+	DIR* Top_dir;
 	Top_dir = opendir(path);
-	
+	struct dirent* dir;
 	chdir(path);
-	
-	C_dir = readdir(Top_dir);
+	//loop though while dir is not null
+	//commpares the first letter of each directory name
+	//if it is a . or .. then continue else run process path of d_name directory 
+	while((dir=(readdir(Top_dir)))!= NULL ) {
 
-	
-
-	while( Top_dir != NULL) {
-		if((strcmp(C_dir -> d_name, ".") !=0) && (strcmp(C_dir -> d_name, "..") != 0)){
-		process_path(C_dir -> d_name);
-       	}
-		C_dir = readdir(Top_dir);
+		if((strcmp(dir->d_name, ".") ==0) || (strcmp(dir->d_name, "..") == 0)) {
+		continue;
+		}
+		process_path(dir->d_name);
 	}
-
-	num_dirs++;
+	//increment num_dirs, cd two levels up and close top_dir
+	++num_dir;
 	chdir("..");
 	closedir(Top_dir);
-
-
-
-
 }
 
 void process_file(const char* path) {
-  /*
-   * Update the number of regular files.
-   */
-
-num_regular++;
+	++num_regular;
 
 }
 
 void process_path(const char* path) {
-  if (is_dir(path)) {
-    process_directory(path);
-  } else {
-    process_file(path);
-  }
+	if(is_dir(path)){
+		//if the path is a driectory run process direcotry to get the num directories 
+		process_directory(path);
+	} else {
+		//else continue wuth process_file
+		process_file(path);
+	}
 }
 
-int main (int argc, char *argv[]) {
-  // Ensure an argument was provided.
-  if (argc != 2) {
-    printf ("Usage: %s <path>\n", argv[0]);
-    printf ("       where <path> is the file or root of the tree you want to summarize.\n");
-    return 1;
-  }
+int main (int argc, char *argv[]){
+	//command line argument handling
+	if(argc!=2) {
+		printf("Usage: %s <path>\n", argv[0]);
+		printf("       where <path> is the file or root of the tree you want to summarize.\n");
+	return 1;	
+	}
 
-  num_dirs = 0;
-  num_regular = 0;
+	//reset the variables
 
-  process_path(argv[1]);
-
-  printf("There were %d directories.\n", num_dirs);
-  printf("There were %d regular files.\n", num_regular);
-
-  return 0;
+	num_dir = 0;
+	num_regular = 0;
+	process_path(argv[1]);
+	//print out the results 
+	printf("There were %d directories.\n", num_dir);
+	printf("There were %d regular files.\n", num_regular);
+	return 0;
 }

@@ -5,73 +5,88 @@
 #define BUF_SIZE 1024
 
 bool is_vowel(char c) {
-	
-	char vowel[5] = {'A', 'E', 'I', 'O', 'U'};
-	int i = 0;
-	while(toupper(c) != vowel[i] && i < 5) {
-		if (i == 5) {
-			return false;
-		}
-		else {
-			i++;
-		}
-	}
-
-	return true;
+	//checks char c agaisnt every possible vowel, both upper case and lower case.
+	return c == 'a' || c == 'A' || c == 'e' || c == 'E' || c == 'i' || c == 'I' || c == 'o' || c == 'O' || c == 'u' || c == 'U';
 
 
 }
 
 int copy_non_vowels(int num_chars, char* in_buf, char* out_buf) {
+	// finding the position of all consonants within the in_buf stream. 
+	// loops through the character string, and for every postion that is not a vowel gets copied to the outbuf stream.
 	
-	int non_vowels = 0;
-	for(int i = 0; i < BUF_SIZE; i++) {
-		if(is_vowel(in_buf[i] == false)) {
-			out_buf[non_vowels] = in_buf[i];
-			non_vowels = non_vowels + 1;
+	int position = 0;
+	for (int i = 0; i < num_chars; i++) {		
+		if(!is_vowel(in_buf[i])){
+			out_buf[position]=in_buf[i];
+			position++;
 		}
 	}
-
-	return non_vowels;
+	return position;
 }
 
 void disemvowel(FILE* inputFile, FILE* outputFile) {
+	//set up integers for the character positions bot vowel and consonants
+	//create the in buffer to be the size of BUF_SIZE;
+	//read the characters from the input file and feed them into the in_buffe
 
-	int dis_size = BUF_SIZE;
-	int dis_out = 0;
-	char* char_input = (char*) calloc(dis_size,sizeof(char));
-	fread(char_input, sizeof(char), dis_size, inputFile);
-	for(int i = 0; i < dis_size; i++) {
-		if (is_vowel(char_input[i])){
-		}
-		else {
-		dis_out = dis_out + 1;
-		}
-	}
-	char* char_out = (char*) calloc(dis_out, sizeof(char));
-	copy_non_vowels(dis_out, char_input, char_out);
-	
-	free(char_input);
-	free(char_out);
+	int chars;
+	int other_chars;
+	char in_buffer[BUF_SIZE];
+	chars = fread(in_buffer, sizeof(char), BUF_SIZE, inputFile);
+	char out_buffer[chars];
+	other_chars = copy_non_vowels(chars, in_buffer, out_buffer);
+	fwrite(out_buffer, sizeof(char), other_chars, outputFile);
 }
 
 
-void main (int argc, char *argv[]) {
-	FILE *inputFile;
-	FILE *outputFile;
-	
-	if( argc == 1) {
-	diemvowel(inputFile, outputFile);
-	} else if (argc == 2) { inputFile = fopen(argv[1], "r");}
-	else if ( argc == 3) {inputFile = fopen(argv[1], "r");
-			      outputFile = fopen(argv[2], "w");}
-	else {
-	print("incorret file inout");
-	}
-		
+int main (int argc, char *argv[]) {
+	FILE *input;
+	FILE *output;
+//case handling for arguments.
+	switch(argc) {
+		case 1:
+			//set up the base case of input output to stdin/out
+			input=stdin;
+			output=stdout;
+			break;
 
-	disemvowel(inputFile, outputFile);
+		case 2:
+			if((input = fopen(argv[1], "r" )) == NULL) {
+				puts("input incorrect");
+				exit(0);
+			} else {
+			//do nothing
+			}
+
+			break;
+		case 3:
+			if((input=fopen(argv[2], "r")) == NULL) {
+				puts("input incorrect");
+				exit(0);
+			} else {
+			//do nothing
+			}
+			if ((output= fopen(argv[2], "w")) == NULL) {
+				puts("output incorrect");
+				exit(0);
+			} else {
+			//do nothing
+			}
+
+			break; 
+
+		default:
+			puts("too many args");
+			exit(0);
+	}
+	disemvowel(input,output);
+	fclose(input);
+	fclose(output);
+
 	return 0;
 
+
+	
 
 }
